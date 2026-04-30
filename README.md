@@ -22,6 +22,11 @@ Predict whether a bank client will subscribe to a term deposit using the
 pip install -r requirements.txt
 python train_model.py        # generates bank_model.pkl
 streamlit run app.py         # opens at http://localhost:8501
+
+OR
+
+https://bankproject-eo378muwrwmtmknznns6nt.streamlit.app
+
 ```
 
 ## Features
