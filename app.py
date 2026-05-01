@@ -63,8 +63,10 @@ cons_conf_idx = st.sidebar.slider(
 nr_employed = st.sidebar.slider(
     "Number of Employees (k)", 4960.0, 5230.0, 5191.0, 10.0)
 
-# Engineered feature (must match training pipeline)
-real_interest_rate = euribor3m - cons_price_idx
+# Engineered features (must match training pipeline)
+CPI_BASE = 92.201  # same base as train_model.py
+inflation_rate = ((cons_price_idx - CPI_BASE) / CPI_BASE) * 100
+real_interest_rate = euribor3m - inflation_rate
 
 # ── Predict ──────────────────────────────────────────────────────
 st.divider()
@@ -78,6 +80,7 @@ if st.button("🔮 Predict", use_container_width=True):
         "emp.var.rate": emp_var_rate, "cons.price.idx": cons_price_idx,
         "cons.conf.idx": cons_conf_idx, "euribor3m": euribor3m,
         "nr.employed": nr_employed,
+        "inflation_rate": inflation_rate,
         "real_interest_rate": real_interest_rate,
     }])
 
@@ -90,12 +93,10 @@ if st.button("🔮 Predict", use_container_width=True):
         st.info("ℹ️ Low-potential client — resource conservation is recommended.")
 
     with st.expander("📖 Economic Commentary"):
-        CPI_BASE = 92.201
-        inflation = ((cons_price_idx - CPI_BASE) / CPI_BASE) * 100
-        real_rate = euribor3m - inflation
+        real_rate = real_interest_rate
         st.markdown(
             f"**Fisher Equation:** Nominal {euribor3m:.2f}% − "
-            f"Inflation {inflation:.2f}% ≈ **Real Rate {real_rate:.2f}%**\n\n"
+            f"Inflation {inflation_rate:.2f}% ≈ **Real Rate {real_rate:.2f}%**\n\n"
             + ("Positive real rate → deposits are attractive."
                if real_rate > 0 else
                "Negative real rate → deposits lose purchasing power.")
@@ -108,5 +109,6 @@ if st.button("🔮 Predict", use_container_width=True):
 st.divider()
 st.caption(
     "Model trained on Portuguese bank marketing data (2008–2013). "
-    "Feature real_interest_rate = euribor3m − CPI (Fisher equation)."
+    "Feature real_interest_rate = euribor3m − inflation_rate, "
+    "where inflation_rate = ((CPI − 92.201) / 92.201) × 100 (Fisher equation)."
 )
