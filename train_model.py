@@ -17,7 +17,11 @@ df = pd.read_csv('bank-additional.csv', sep=';')
 df = df.drop('duration', axis=1)
 
 # 3. Feature Engineering — Real Interest Rate (Fisher equation)
-df['real_interest_rate'] = df['euribor3m'] - df['cons.price.idx']
+#    Fisher: r_real ≈ r_nominal − π,  where π = inflation rate (%)
+#    Inflation is derived from CPI: π = ((CPI − CPI_base) / CPI_base) × 100
+CPI_BASE = 92.201  # minimum CPI in dataset, used as base period
+df['inflation_rate'] = ((df['cons.price.idx'] - CPI_BASE) / CPI_BASE) * 100
+df['real_interest_rate'] = df['euribor3m'] - df['inflation_rate']
 
 # 4. Prepare features and target
 X = df.drop('y', axis=1)
